@@ -2,6 +2,12 @@
 
 A desktop-first, frontend-only classroom cooling operations prototype. Its four connected modules use one shared illustrative dataset: Overview Dashboard, Buildings & Rooms, Approval Center, and Rules & Settings.
 
+**Live website:** https://vvaleire12.github.io/hku-campus-cooling-workbench/#/overview
+
+**Standalone HTML:** [View or download the published HTML](https://github.com/vvaleire12/hku-campus-cooling-workbench/blob/gh-pages/index.html). Use GitHub's download button to save the file rather than viewing its source.
+
+Initial Pages deployment completed successfully. See [deployment evidence](docs/deployment.md).
+
 ## HTML version and GitHub Pages
 
 Build a single HTML file with all JavaScript, CSS and images embedded:
