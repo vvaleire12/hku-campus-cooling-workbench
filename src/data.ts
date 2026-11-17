@@ -1,0 +1,597 @@
+import type {
+  Approval,
+  Building,
+  Condition,
+  Room,
+  Rule,
+  Schedule,
+  State,
+} from "./types";
+export const DEMO_DATE = "2026-11-17";
+export const SNAPSHOT = "2026-11-17T13:15:00+08:00";
+// Original map coordinates, 1283 × 736. Separate footprints of one building share an ID.
+export const buildings: Building[] = [
+  ["UL", "UL", "M36 12 L60 6 67 39 89 46 91 69 46 70 43 48 35 42 Z", 65, 43],
+  [
+    "RBC",
+    "RBC",
+    "M154 67 L239 62 245 57 294 56 295 61 348 60 348 75 299 77 298 103 273 104 271 121 238 120 237 110 176 116 173 107 158 108 Z",
+    218,
+    88,
+  ],
+  [
+    "UD",
+    "UD",
+    "M385 88 L419 94 432 69 469 80 466 94 487 101 478 135 435 122 432 117 386 109 Z",
+    432,
+    104,
+  ],
+  [
+    "GH",
+    "Graduate House",
+    "M477 67 L546 67 557 73 555 87 531 88 528 95 490 86 478 86 Z M516 108 L548 112 549 155 515 161 Z",
+    520,
+    84,
+  ],
+  [
+    "MH",
+    "MH",
+    "M58 213 L106 197 112 188 139 181 144 166 169 164 170 180 161 186 162 203 142 207 138 219 85 237 80 244 62 239 Z",
+    113,
+    205,
+  ],
+  [
+    "MW",
+    "Meng Wah Complex",
+    "M191 160 L262 161 263 199 239 203 237 213 219 213 219 202 191 202 Z",
+    227,
+    182,
+  ],
+  [
+    "EH",
+    "EH",
+    "M77 260 L130 244 139 240 163 230 166 219 182 215 187 231 174 235 177 254 149 262 143 258 92 278 85 289 Z",
+    132,
+    258,
+  ],
+  [
+    "B08",
+    "Building 08 (map code not shown)",
+    "M216 216 L282 215 283 251 216 251 Z",
+    250,
+    234,
+  ],
+  ["RM", "RM", "M287 210 L395 210 395 254 365 255 365 262 287 260 Z", 326, 234],
+  ["RR", "RR", "M396 210 L472 211 472 253 425 255 420 262 397 262 Z", 435, 234],
+  ["JL", "JL", "M516 209 L567 207 570 257 516 256 Z", 544, 233],
+  ["CYA", "CYA", "M193 274 L310 274 311 292 193 293 Z", 249, 283],
+  [
+    "RH",
+    "RH",
+    "M353 286 L371 279 383 291 375 303 391 310 384 320 365 322 351 312 Z",
+    369,
+    305,
+  ],
+  ["HC", "HC", "M453 279 L532 279 535 312 522 319 454 314 Z", 494, 298],
+  ["CYC", "CYC", "M45 318 L118 320 119 354 105 363 47 359 Z", 80, 339],
+  ["CYP", "CYP", "M82 371 L161 371 160 411 92 412 82 405 Z", 121, 391],
+  ["KK", "KK", "M235 367 L294 367 294 412 312 414 312 434 237 431 Z", 265, 398],
+  ["KB", "Knowles Building", "M327 338 L400 334 402 437 322 437 Z", 363, 374],
+  [
+    "LBO",
+    "Main Library",
+    "M422 344 L529 341 540 354 547 375 443 377 443 362 424 361 Z",
+    480,
+    357,
+  ],
+  [
+    "LBN",
+    "LBN",
+    "M443 379 L547 375 547 359 570 361 569 455 527 456 527 471 444 469 Z",
+    494,
+    426,
+  ],
+  [
+    "KBS",
+    "KBS",
+    "M585 370 L607 368 609 361 625 367 643 407 640 474 616 480 615 491 599 486 598 476 582 476 Z",
+    612,
+    425,
+  ],
+  [
+    "HW",
+    "Haking Wong Building",
+    "M658 302 L702 298 714 290 781 294 788 320 787 385 663 387 Z",
+    753,
+    313,
+  ],
+  [
+    "SLH",
+    "SLH",
+    "M789 305 L840 303 848 321 870 323 870 339 791 338 Z",
+    822,
+    319,
+  ],
+  ["COB", "COB", "M791 340 L871 342 871 367 863 387 793 385 Z", 830, 356],
+  ["CB", "CB", "M873 318 L939 309 948 318 947 373 877 372 Z", 909, 341],
+  [
+    "CJT",
+    "CJT",
+    "M1001 345 L1166 345 1171 361 1164 382 1006 382 999 370 Z",
+    1078,
+    363,
+  ],
+  [
+    "CRT",
+    "CRT",
+    "M1051 384 L1078 384 1078 416 1139 417 1140 385 1164 386 1166 414 1200 413 1202 390 1227 391 1226 429 1209 450 1148 469 1106 461 1051 453 Z M1071 468 L1091 469 1102 479 1090 481 Z M1151 476 L1177 473 1187 482 1166 484 Z",
+    1106,
+    439,
+  ],
+  [
+    "CCT",
+    "CCT",
+    "M1176 350 L1195 346 1200 357 1210 356 1212 350 1240 350 1255 367 1242 392 1210 390 1197 384 1184 391 1172 384 Z",
+    1222,
+    372,
+  ],
+  ["TC", "TC", "M78 442 L116 442 117 479 80 482 Z", 96, 462],
+  ["SWH", "SWH", "M128 451 L171 451 177 480 166 491 130 491 Z", 150, 472],
+  ["FS", "FS", "M130 493 L168 491 168 537 133 537 Z", 151, 514],
+  [
+    "TT",
+    "TT",
+    "M177 508 L200 503 215 511 219 531 207 540 187 543 177 531 Z",
+    195,
+    521,
+  ],
+  [
+    "PP",
+    "PP",
+    "M234 477 L250 469 258 455 275 463 286 477 279 496 241 514 229 506 Z",
+    258,
+    486,
+  ],
+  [
+    "MB",
+    "Main Building",
+    "M414 477 L550 477 553 597 547 610 505 611 505 625 476 627 475 612 411 607 Z M444 503 L467 503 467 521 444 521 Z M498 503 L522 503 522 521 498 521 Z M443 550 L466 550 466 568 443 568 Z M499 550 L522 550 522 568 499 568 Z",
+    483,
+    540,
+  ],
+  [
+    "HH",
+    "HH",
+    "M417 645 L466 643 473 634 484 638 488 650 511 649 518 671 470 678 416 672 Z",
+    462,
+    661,
+  ],
+  [
+    "PS",
+    "PS",
+    "M519 651 L539 644 551 629 567 629 572 644 561 664 521 675 Z",
+    542,
+    657,
+  ],
+  [
+    "YP",
+    "YP",
+    "M914 518 L927 519 939 538 950 543 955 560 939 573 919 560 911 536 Z",
+    934,
+    546,
+  ],
+].map(([id, name, path, x, y]) => ({
+  id,
+  name,
+  path,
+  x,
+  y,
+  dataClassification: "ILLUSTRATIVE",
+})) as Building[];
+export const rooms: Room[] = [
+  {
+    id: "MB-201",
+    dataClassification: "ILLUSTRATIVE",
+    buildingId: "MB",
+    floor: "2/F",
+    type: "LECTURE",
+    capacity: 60,
+    occupied: false,
+    power: "ON",
+    temperature: 23.5,
+    setpoint: 22.5,
+    humidity: 58,
+  },
+  {
+    id: "MB-302",
+    dataClassification: "ILLUSTRATIVE",
+    buildingId: "MB",
+    floor: "3/F",
+    type: "SEMINAR",
+    capacity: 35,
+    occupied: false,
+    power: "ON",
+    temperature: 24.2,
+    setpoint: 23,
+    humidity: 61,
+  },
+  {
+    id: "HW-304",
+    dataClassification: "ILLUSTRATIVE",
+    buildingId: "HW",
+    floor: "3/F",
+    type: "LECTURE",
+    capacity: 80,
+    occupied: true,
+    power: "ON",
+    temperature: 22.8,
+    setpoint: 22,
+    humidity: 56,
+  },
+  {
+    id: "HW-205",
+    dataClassification: "ILLUSTRATIVE",
+    buildingId: "HW",
+    floor: "2/F",
+    type: "TUTORIAL",
+    capacity: 45,
+    occupied: false,
+    power: "OFF",
+    temperature: 25,
+    setpoint: 24,
+    humidity: 63,
+  },
+  {
+    id: "MW-402",
+    dataClassification: "ILLUSTRATIVE",
+    buildingId: "MW",
+    floor: "4/F",
+    type: "SEMINAR",
+    capacity: 30,
+    occupied: false,
+    power: "OFF",
+    temperature: 25,
+    setpoint: 24,
+    humidity: 60,
+  },
+];
+const scheduleRows = [
+  ["MB-201", "16", "101", "Climate Risk Seminar", "09:00", "11:50"],
+  ["MB-201", "17", "102", "Building Energy Workshop", "14:00", "15:50"],
+  ["MB-201", "18", "103", "Urban Climate Discussion", "17:00", "19:50"],
+  ["MB-201", "20", "104", "Sustainability Policy Lecture", "10:00", "11:50"],
+  ["HW-304", "17", "201", "Sustainable Building Lecture", "13:00", "14:50"],
+  [
+    "HW-304",
+    "19",
+    "202",
+    "Environmental Management Workshop",
+    "09:00",
+    "11:50",
+  ],
+  ["HW-205", "18", "203", "Building Systems Tutorial", "09:00", "11:50"],
+  ["HW-205", "20", "204", "Campus Planning Workshop", "14:00", "15:50"],
+  ["MW-402", "17", "301", "Urban Climate Tutorial", "17:00", "18:50"],
+  ["MW-402", "21", "302", "Building Systems Seminar", "09:00", "11:50"],
+];
+export const schedules: Schedule[] = scheduleRows.map(
+  ([roomId, day, code, name, start, end]) => ({
+    id: `SCH-${code}`,
+    dataClassification: "ILLUSTRATIVE",
+    roomId,
+    date: `2026-11-${day}`,
+    code: `DEMO-${code}`,
+    name,
+    start,
+    end,
+    status: "CONFIRMED",
+    expected: roomId === "HW-205" ? "HIGH" : "MEDIUM",
+  }),
+);
+// Historical illustrative HVAC samples, scoped to the same five monitored rooms.
+export const hvacSeries: Record<string, string[]> = {
+  "08:00": ["MB-201"],
+  "10:00": ["MB-201", "MB-302"],
+  "12:00": ["MB-201", "MB-302", "HW-304"],
+  "14:00": ["MB-201", "MB-302", "HW-304"],
+  "16:00": ["MB-302", "HW-304"],
+  "18:00": ["MW-402"],
+  "20:00": ["MB-302"],
+};
+export const typeLabels = {
+  COMFORT_FEEDBACK: "Comfort Feedback",
+  SCHEDULE_OPTIMIZATION: "Schedule Optimization",
+  WEATHER_ADJUSTMENT: "Weather Adjustment",
+  RULE_BASED_ALERT: "Rule-based Alert",
+};
+export const sourceLabels = {
+  COMFORT_FEEDBACK: "Comfort Feedback",
+  SCHEDULE_OPTIMIZATION: "Schedule Engine",
+  WEATHER_ADJUSTMENT: "Weather Data",
+  RULE_BASED_ALERT: "Operating Rules",
+};
+export const roomTypeLabels = {
+  LECTURE: "Lecture Room",
+  SEMINAR: "Seminar Room",
+  TUTORIAL: "Tutorial Room",
+};
+export const modes = {
+  COOLING: "Cooling",
+  HEATING: "Heating",
+  DEHUMIDIFY: "Dehumidify",
+  ENERGY_SAVING: "Energy Saving",
+};
+export const categories: Record<string, string> = {
+  TEMPERATURE: "Temperature",
+  SCHEDULE: "Schedule",
+  OCCUPANCY: "Occupancy",
+  WEATHER: "Weather",
+  COMFORT: "Comfort",
+};
+export const triggerLabels: Record<string, string> = {
+  CLASS_SCHEDULE: "Class Schedule",
+  ROOM_OCCUPANCY: "Room Occupancy",
+  INDOOR_TEMPERATURE: "Indoor Temperature",
+  OUTDOOR_TEMPERATURE: "Outdoor Temperature",
+  COMFORT_FEEDBACK: "Comfort Feedback",
+};
+export const newCondition = (): Condition => ({
+  type: "CLASS_SCHEDULE",
+  operator: "GT",
+  value: 30,
+  expected: "HIGH",
+  exists: true,
+  window: 30,
+  sentiment: "TOO_COLD",
+});
+export const newRule = (): Rule => ({
+  id: "",
+  dataClassification: "ILLUSTRATIVE",
+  name: "",
+  category: "",
+  description: "",
+  building: "ALL",
+  room: "ALL",
+  conditions: [newCondition()],
+  power: "ON",
+  mode: "COOLING",
+  setpoint: 24.5,
+  start: "08:30",
+  end: "11:50",
+  relative: false,
+  lead: 30,
+  priority: "MEDIUM",
+  status: "DRAFT",
+  system: false,
+  updatedAt: SNAPSHOT,
+});
+export const initialRules: Rule[] = [
+  {
+    ...newRule(),
+    id: "RUL-001",
+    name: "Standard Temperature Setpoint Guideline",
+    conditions: [],
+    category: "TEMPERATURE",
+    description:
+      "A proposed setpoint outside 23–26°C is flagged for administrator review. The standard reference is 24.5°C. Exceptions remain subject to human review.",
+    status: "ACTIVE",
+    system: true,
+  },
+  {
+    ...newRule(),
+    id: "RUL-002",
+    name: "High-Occupancy Pre-cooling",
+    category: "SCHEDULE",
+    description:
+      "For an upcoming high-attendance event, propose 23.5°C cooling 30 minutes before it starts, then restore 24.5°C at the scheduled start. Values and timing are illustrative.",
+    setpoint: 23.5,
+    relative: true,
+    status: "ACTIVE",
+    system: true,
+  },
+];
+const config = (setpoint: number, start = "13:30", end = "16:00") => ({
+  dataClassification: "ILLUSTRATIVE" as const,
+  power: "ON" as const,
+  date: DEMO_DATE,
+  start,
+  end,
+  mode: "COOLING" as const,
+  setpoint,
+});
+export const initialApprovals: Approval[] = [
+  {
+    id: "APR-2026-001",
+    dataClassification: "ILLUSTRATIVE",
+    type: "COMFORT_FEEDBACK",
+    roomId: "MB-201",
+    priority: "HIGH",
+    status: "PENDING",
+    createdAt: "2026-11-17T13:05:00+08:00",
+    summary: "A small adjustment. A more comfortable classroom.",
+    evidence: [
+      "Indoor temperature: 23.5°C · Current setpoint: 22.5°C",
+      "Occupancy snapshot: Unoccupied · HVAC: ON",
+      "Next confirmed class: 14:00–15:50",
+    ],
+    feedback: [6, 1, 1],
+    feedbackWindow: ["12:30", "13:00"],
+    recommendation: config(23),
+    rationale:
+      "Six of eight reports describe the room as too cold. Raising the setpoint by 0.5°C may improve comfort while maintaining cooling.",
+  },
+  {
+    id: "APR-2026-002",
+    dataClassification: "ILLUSTRATIVE",
+    type: "SCHEDULE_OPTIMIZATION",
+    roomId: "MB-302",
+    priority: "HIGH",
+    status: "PENDING",
+    createdAt: "2026-11-17T12:50:00+08:00",
+    summary: "Cooling is running in an unbooked, unoccupied room.",
+    evidence: [
+      "No confirmed bookings during 16–22 November 2026",
+      "Occupancy snapshot: Unoccupied · HVAC: ON",
+      "Indoor temperature: 24.2°C · Current setpoint: 23.0°C",
+      "Potential avoidable operating period: 13:30–16:00",
+    ],
+    recommendation: { ...config(23), power: "OFF", mode: null, setpoint: null },
+    rationale:
+      "There are no confirmed bookings in the reference week and the simulated sensor indicates no occupants. Consider switching cooling off during this period.",
+  },
+  {
+    id: "APR-2026-003",
+    dataClassification: "ILLUSTRATIVE",
+    type: "COMFORT_FEEDBACK",
+    roomId: "HW-304",
+    priority: "MEDIUM",
+    status: "PENDING",
+    createdAt: "2026-11-17T12:40:00+08:00",
+    summary: "Review warm feedback during a scheduled session.",
+    evidence: [
+      "Indoor temperature: 22.8°C · Current setpoint: 22.0°C",
+      "Occupancy snapshot: Occupied · HVAC: ON",
+      "Confirmed class: 13:00–14:50",
+    ],
+    feedback: [0, 1, 4],
+    feedbackWindow: ["12:00", "12:30"],
+    recommendation: config(21.5, "13:15", "14:50"),
+    rationale:
+      "Four of five reports describe the room as too warm. Review the proposed 21.5°C setting as an exception to the 23–26°C standard reference range.",
+  },
+  {
+    id: "APR-2026-004",
+    dataClassification: "ILLUSTRATIVE",
+    type: "WEATHER_ADJUSTMENT",
+    roomId: "MW-402",
+    priority: "MEDIUM",
+    status: "PENDING",
+    createdAt: "2026-11-17T12:20:00+08:00",
+    summary: "Prepare the classroom for a warm afternoon.",
+    evidence: [
+      "Illustrative outdoor temperature: 29°C",
+      "Indoor temperature: 25.0°C · HVAC: OFF",
+      "Upcoming confirmed class: 17:00–18:50",
+    ],
+    recommendation: config(23.5, "16:30", "18:50"),
+    rationale:
+      "Start cooling 30 minutes before the scheduled session to prepare the room. This is a static demonstration, not a live weather forecast.",
+  },
+  {
+    id: "APR-2026-005",
+    dataClassification: "ILLUSTRATIVE",
+    type: "RULE_BASED_ALERT",
+    roomId: "HW-205",
+    priority: "LOW",
+    status: "PENDING",
+    createdAt: "2026-11-17T11:55:00+08:00",
+    summary: "Review the next morning’s pre-operation schedule.",
+    evidence: [
+      "Upcoming class: Wednesday 18 Nov, 09:00–11:50",
+      "Occupancy snapshot: Unoccupied · HVAC: OFF",
+      "Predefined schedule scenario · not a live rule-engine result",
+    ],
+    recommendation: { ...config(24, "08:30", "11:50"), date: "2026-11-18" },
+    rationale:
+      "Apply a predefined pre-operation schedule for the next scheduled class. The 24.0°C single-period scenario is distinct from the two-stage RUL-002 reference rule.",
+  },
+];
+const history = ([101, 102, 103] as const).map((n, i): Approval => {
+  const rejected = n === 102;
+  const base = initialApprovals[[0, 1, 3][i]];
+  const at = `2026-11-16T${["11:10", "10:03", "16:05"][i]}:00+08:00`;
+  return {
+    ...base,
+    id: `APR-2026-${n}`,
+    feedbackWindow: base.feedback ? ["09:00", "09:30"] : undefined,
+    roomId: n === 102 ? "HW-205" : base.roomId,
+    status: rejected ? "REJECTED" : "COMPLETED",
+    createdAt: "2026-11-16T09:30:00+08:00",
+    evidence: [
+      "Original illustrative request snapshot, recorded on 16 November 2026.",
+      "This evidence is preserved independently of the current room snapshot.",
+    ],
+    comment: rejected
+      ? "Further operational information is required."
+      : "Temperature adjustment approved based on the original request evidence.",
+    reason: rejected ? "Insufficient evidence" : undefined,
+    reviewedAt: at,
+    config: rejected
+      ? undefined
+      : { ...base.recommendation, date: "2026-11-16", appliedAt: at },
+    timeline: [
+      { title: "Request created", at: "2026-11-16T09:30:00+08:00" },
+      { title: "Reviewed by Facility Administrator", at },
+      { title: rejected ? "Request rejected" : "Approval confirmed", at },
+      ...(!rejected
+        ? [
+            { title: "Simulated configuration saved", at },
+            { title: "Workflow completed", at },
+          ]
+        : []),
+    ],
+  };
+});
+export const initialState: State = {
+  version: 1,
+  approvals: [...initialApprovals, ...history],
+  rules: initialRules,
+  activities: [...initialApprovals, ...history].map((a) => ({
+    id: `ACT-${a.id}`,
+    dataClassification: "ILLUSTRATIVE",
+    at: a.reviewedAt || a.createdAt,
+    title: a.summary,
+    roomId: a.roomId,
+    approvalId: a.id,
+    source: sourceLabels[a.type],
+    status: a.status,
+  })),
+};
+// A separate fixed scenario, not a count of pending approvals or measured savings.
+export const impactScenario = [
+  {
+    id: "OP-01",
+    dataClassification: "ILLUSTRATIVE",
+    roomId: "MB-302",
+    power: 3,
+    hours: 2.5,
+    note: "Avoidable unbooked operation",
+  },
+  {
+    id: "OP-02",
+    dataClassification: "ILLUSTRATIVE",
+    roomId: "MB-201",
+    power: 2.4,
+    hours: 1,
+    note: "Illustrative schedule alignment",
+  },
+  {
+    id: "OP-03",
+    dataClassification: "ILLUSTRATIVE",
+    roomId: "HW-304",
+    power: 3,
+    hours: 1.5,
+    note: "Illustrative after-session operation",
+  },
+  {
+    id: "OP-04",
+    dataClassification: "ILLUSTRATIVE",
+    roomId: "MW-402",
+    power: 2.8,
+    hours: 1.5,
+    note: "Illustrative end-of-day operation",
+  },
+];
+
+initialState.activities.push({
+  id: "ACT-history-reviewed",
+  dataClassification: "ILLUSTRATIVE",
+  at: "2026-11-17T13:10:00+08:00",
+  title: "Historical comfort decision reviewed",
+  roomId: "MB-201",
+  approvalId: "APR-2026-101",
+  source: "System",
+  status: "COMPLETED",
+});
+
+export const hvacSeriesDataClassification = "ILLUSTRATIVE" as const;
